@@ -70,3 +70,29 @@ def unlock_pdf(input_pdf_path):
    pdf_writer(input_pdf_path,lock=False)
 
 #TODO write reader that returns structured data, fields and adjacent text?
+
+def pdf_reader(input_pdf_path,output_pdf_path=None, data_dict=None,lock=None):
+    ANNOT_KEY = '/Annots'
+    ANNOT_FIELD_KEY = '/T'
+    ANNOT_VAL_KEY = '/V'
+    ANNOT_RECT_KEY = '/Rect'
+    SUBTYPE_KEY = '/Subtype'
+    WIDGET_SUBTYPE_KEY = '/Widget'
+
+    template_pdf = pdfrw.PdfReader(input_pdf_path)
+    annotation_col=[]    
+    for page in template_pdf.pages:
+        annotation_col.append(page[ANNOT_KEY])
+    if data_dict:
+        data_dict=data_dict
+    else: 
+        data_dict={}  #creating empty dict, won't trigger later if statement
+    keylist=[]
+    for annotations in annotation_col:
+        for annotation in annotations:
+            try:
+                key = annotation[ANNOT_FIELD_KEY][1:-1]
+                keylist.append(key)
+            except:
+                pass
+    return(keylist)
