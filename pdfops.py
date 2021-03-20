@@ -12,8 +12,13 @@ taht each page will have uniquely named fields with no overlap. Fields sharing
 the same name and automatically enumerated by Adobe cannot be filled out by
 this method and duplicated field names will cause collisions in the dictionary.
 """
-
+#I hereby curse the creator of pdfrw for not taking the simple step of
+#making this damned library sufficient for extracting text. 
+#Leaving the rest of us to use 3 and 4 solutions to 1 problem is insane. 
+#CURSE YOU GREYBEARDS
 import pdfrw
+import PyPDF2
+
 #TODO find out about read-only versions non-read only versus locking 
 
 def pdf_writer(input_pdf_path,output_pdf_path=None, data_dict=None,lock=None):
@@ -71,7 +76,7 @@ def unlock_pdf(input_pdf_path):
 
 #TODO write reader that returns structured data, fields and adjacent text?
 
-def pdf_reader(input_pdf_path,output_pdf_path=None, data_dict=None,lock=None):
+def pdf_fields(input_pdf_path,output_pdf_path=None, data_dict=None,lock=None):
     ANNOT_KEY = '/Annots'
     ANNOT_FIELD_KEY = '/T'
     ANNOT_VAL_KEY = '/V'
@@ -96,3 +101,15 @@ def pdf_reader(input_pdf_path,output_pdf_path=None, data_dict=None,lock=None):
             except:
                 pass
     return(keylist)
+
+def pdf_text(pdf_path):
+    linelist=[]
+    read_pdf = PyPDF2.PdfFileReader(pdf_path)
+    number_of_pages = read_pdf.getNumPages()
+    for i in range(1,number_of_pages):
+        page = read_pdf.getPage(i)
+        page_content = page.extractText()
+        linelist.append(page_content)
+    return(linelist)
+    
+    
