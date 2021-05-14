@@ -24,6 +24,9 @@ import PyPDF2
 def pdf_writer(input_pdf_path,output_pdf_path=None, data_dict=None,lock=None):
     ANNOT_KEY = '/Annots'
     ANNOT_FIELD_KEY = '/T'
+    ANNOT_FORM_type = '/FT'         # Form type (e.g. text/button)
+    ANNOT_FORM_button = '/Btn'      # ID for buttons, i.e. a checkbox
+    ANNOT_FORM_text = '/Tx'         # ID for textbox
     ANNOT_VAL_KEY = '/V'
     ANNOT_RECT_KEY = '/Rect'
     SUBTYPE_KEY = '/Subtype'
@@ -40,26 +43,28 @@ def pdf_writer(input_pdf_path,output_pdf_path=None, data_dict=None,lock=None):
     
     for annotations in annotation_col:
         for annotation in annotations:
-            key = annotation[ANNOT_FIELD_KEY][1:-1]
-            if key in data_dict.keys():
-                try:
-                    annotation.update(
-                    pdfrw.PdfDict(V='{}'.format(data_dict[key]))
-                )
-                except:
-                    print("didn't work boss")
-            if lock:
-                if lock==False:
-                   annotation.update(pdfrw.PdfDict(Ff=0))
-                if lock==True:
-                   annotation.update(pdfrw.PdfDict(Ff=1)) 
+            if type(annotation)!=None:
+                if annotation[ANNOT_FIELD_KEY] and annotation[SUBTYPE_KEY] == WIDGET_SUBTYPE_KEY :
+                    key = annotation[ANNOT_FIELD_KEY][1:-1]
+                    if key in data_dict.keys():
+                        try:
+                            annotation.update(
+                            pdfrw.PdfDict(V='{}'.format(data_dict[key]))
+                        )
+                        except:
+                            print("didn't work boss")
+                    if lock:
+                        if lock==False:
+                           annotation.update(pdfrw.PdfDict(Ff=0))
+                        if lock==True:
+                           annotation.update(pdfrw.PdfDict(Ff=1)) 
     if output_pdf_path:
         output_pdf_path=output_pdf_path
     else:
         output_pdf_path=input_pdf_path
     
     template_pdf.Root.AcroForm.update(pdfrw.PdfDict(NeedAppearances=pdfrw.PdfObject('true'))) 
-    pdfrw.PdfWriter().write(input_pdf_path, template_pdf)        
+    pdfrw.PdfWriter().write(output_pdf_path, template_pdf)        
 
 
 def write_fillable_pdf(input_pdf_path, outfile, data):
